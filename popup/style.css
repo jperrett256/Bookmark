@@ -59,9 +59,22 @@ body {
 	position: fixed;
 	bottom: 20px;
 	right: 20px;
+	border: 1px solid #323031;
+	transition: background-color 1s ease;
 }
 
 .add-btn object {
+	pointer-events: none;
 	width: 16px;
 	filter: invert(100%);
+	transition: filter 1s ease;
+}
+
+.add-btn:hover {
+	background-color: white;
+	cursor: pointer;
+}
+
+.add-btn:hover object {
+	filter: none;
 }
