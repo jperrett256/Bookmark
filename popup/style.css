@@ -18,16 +18,15 @@ body {
 .bookmark-main {
 	display: flex;
 	flex-direction: column;
-	width: 240px;
 	height: 360px;
-	padding: 20px;
-	border: 1px black solid; /* TODO remove (debug) */
+	overflow-y: scroll;
 }
 
 .bookmark-list {
 	list-style: none;
-	padding: 0;
 	margin: 0;
+	padding: 20px;
+	width: 240px;
 }
 
 .bookmark-item {
@@ -37,6 +36,9 @@ body {
 	height: 45px;
 	padding: 10px;
 	border: 1px solid #323031;
+	user-select: none;
+	-moz-user-select: none;
+	cursor: pointer;
 }
 
 .bookmark-item:not(:first-child) {
@@ -58,16 +60,16 @@ body {
 	background-color: #323031;
 	position: fixed;
 	bottom: 20px;
-	right: 20px;
+	left: calc(240px - 30px - 20px); /* 20px + scrollbar width from right */
 	border: 1px solid #323031;
-	transition: background-color 1s ease;
+	transition: background-color 0.2s ease;
 }
 
 .add-btn object {
 	pointer-events: none;
 	width: 16px;
 	filter: invert(100%);
-	transition: filter 1s ease;
+	transition: filter 0.2s ease;
 }
 
 .add-btn:hover {
