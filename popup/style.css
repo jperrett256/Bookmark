@@ -12,7 +12,6 @@ body {
 	box-sizing: border-box;
 	margin: 0;
 	font-family: 'Montserrat';
-	font-size: 14px;
 }
 
 .bookmark-main {
@@ -31,10 +30,10 @@ body {
 
 .bookmark-item {
 	display: flex;
+	justify-content: space-between;
 	align-items: center;
 	width: 100%;
 	height: 45px;
-	padding: 10px;
 	border: 1px solid #323031;
 	user-select: none;
 	-moz-user-select: none;
@@ -45,10 +44,56 @@ body {
 	margin-top: 10px;
 }
 
-.bookmark-item .site {
+.bookmark-item .details {
+	padding: 10px;
+	width: 100%;
+	transition: width 0.2s ease;
+}
+
+.bookmark-item:hover .details {
+	width: calc(100% - 45px);
+}
+
+.bookmark-item .details > * {
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
+}
+
+.bookmark-item .title {
+	font-size: 14px;
+	margin-bottom: 2px;
+}
+
+.bookmark-item .url {
+	font-size: 10px;
+}
+
+.bookmark-item .remove-btn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 45px;
+	width: 0;
+	border-left: 1px solid transparent;
+	transition: border 0s ease 0.2s, width 0.2s ease;
+}
+
+.bookmark-item:hover .remove-btn {
+	width: 45px;
+	border-left: 1px solid #323031;
+	transition: width 0.2s ease;
+}
+
+.bookmark-item .remove-btn object {
+	width: 16px;
+	opacity: 0;
+	transition: opacity 0.1s ease;
+}
+
+.bookmark-item:hover .remove-btn object {
+	pointer-events: none;
+	opacity: 1;
 }
 
 .add-btn {
