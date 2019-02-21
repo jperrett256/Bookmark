@@ -96,7 +96,7 @@ body {
 	opacity: 1;
 }
 
-.add-btn {
+.filter-btn, .add-btn {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -105,23 +105,40 @@ body {
 	background-color: #323031;
 	position: fixed;
 	bottom: 20px;
-	left: calc(240px - 30px - 20px); /* 20px + scrollbar width from right */
 	border: 1px solid #323031;
 	transition: background-color 0.2s ease;
 }
 
-.add-btn object {
-	pointer-events: none;
-	width: 16px;
-	filter: invert(100%);
-	transition: filter 0.2s ease;
+.filter-btn {
+	left: calc(240px - 30px - 20px - 30px - 10px); /* right: 20px + (add-btn width + margin) + scrollbar width */
 }
 
-.add-btn:hover {
-	background-color: white;
+.add-btn {
+	left: calc(240px - 30px - 20px); /* right: 20px + scrollbar width */
+}
+
+.filter-btn:hover, .add-btn:hover {
 	cursor: pointer;
 }
 
-.add-btn:hover object {
+.filter-btn object, .add-btn object {
+	pointer-events: none;
+	width: 16px;
+	transition: filter 0.2s ease;
+}
+
+.filter-btn.active, .add-btn {
+	background-color: #323031;
+}
+
+.filter-btn, .add-btn:hover {
+	background-color: white;
+}
+
+.filter-btn.active object, .add-btn object {
+	filter: invert(100%);
+}
+
+.filter-btn object, .add-btn:hover object {
 	filter: none;
 }
