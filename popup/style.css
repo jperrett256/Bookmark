@@ -59,6 +59,9 @@ body {
 	padding: 10px;
 	width: 100%;
 	transition: width 0.2s ease;
+	text-decoration: none;
+	color: inherit;
+	outline: 0;
 }
 
 .bookmark-item:hover .details {

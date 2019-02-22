@@ -58,11 +58,11 @@ $(function() {
 	/* Function for adding items to display */
 	function addListItem(id, item) {
 		let $new = $(
-			`<li id=${id} class="bookmark-item">` +
-				'<div class="details">' +
+			`<li id="${id}" class="bookmark-item">` +
+				`<a href="${item.url}" class="details" ondragstart="return false">` +
 					`<div class="title">${item.title}</div>` +
 					`<div class="url">${item.url}</div>` +
-				'</div>' +
+				'</a>' +
 				'<div class="remove-btn">' +
 					'<object data="icons/x.svg"></object>' +
 				'</div>' +
@@ -70,7 +70,8 @@ $(function() {
 		).appendTo($list);
 
 		/* Handle applying scroll positions again */
-		$new.click(function() {
+		$new.click(function(event) {
+			event.preventDefault();
 			browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0]).then(function(tab) {
 				if (item.url === tab.url) return browser.tabs.executeScript({
 					code: `window.scroll({top: ${item.position}, behavior: 'smooth'})`
@@ -80,7 +81,8 @@ $(function() {
 			}).catch(console.error.bind(console));
 		});
 
-		// TODO handle middle click
+		/* Prevent link from being dragged */
+		$new.on('dragstart', () => false);
 
 		$new.find('.remove-btn').click(function(event) {
 			event.stopPropagation();
