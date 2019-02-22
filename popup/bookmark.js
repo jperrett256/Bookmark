@@ -17,7 +17,6 @@ $(function() {
 			if (list) {
 				Object.keys(list).forEach(function(id) {
 					let item = JSON.parse(list[id]);
-					// TODO need a better way of checking that urls are equal (e.g. may not need complete string match)
 					/* If the filter is on, need to check if the item url matches the tab url */
 					if (item.url === tab.url || !$('.filter-btn').hasClass('active')) addListItem(id, item);
 				});
@@ -77,9 +76,11 @@ $(function() {
 					code: `window.scroll({top: ${item.position}, behavior: 'smooth'})`
 				});
 				/* If item url is not the url of the active tab, should open items in new tab */
-				return browser.tabs.create({ url: item.url }).then(() => window.close()); // closes window because of 'connection' issue (resetting is a workaround)
+				return browser.tabs.create({ url: item.url });
 			}).catch(console.error.bind(console));
 		});
+
+		// TODO handle middle click
 
 		$new.find('.remove-btn').click(function(event) {
 			event.stopPropagation();
@@ -93,3 +94,6 @@ $(function() {
 	}
 
 });
+
+/* Handle tab change (close popup) */
+browser.tabs.onActivated.addListener(() => window.close());
