@@ -28,6 +28,16 @@ body {
 	width: 240px;
 }
 
+@keyframes fadein {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
 .bookmark-item {
 	display: flex;
 	justify-content: space-between;
@@ -38,6 +48,7 @@ body {
 	user-select: none;
 	-moz-user-select: none;
 	cursor: pointer;
+	animation: 0.2s ease fadein;
 }
 
 .bookmark-item:not(:first-child) {
