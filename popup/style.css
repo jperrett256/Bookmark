@@ -19,6 +19,8 @@ body {
 	flex-direction: column;
 	height: 360px;
 	overflow-y: scroll;
+	user-select: none;
+	-moz-user-select: none;
 }
 
 .bookmark-list {
@@ -45,8 +47,6 @@ body {
 	width: 100%;
 	height: 45px;
 	border: 1px solid #323031;
-	user-select: none;
-	-moz-user-select: none;
 	cursor: pointer;
 	animation: 0.2s ease fadein;
 }

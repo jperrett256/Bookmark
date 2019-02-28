@@ -1,5 +1,35 @@
 $(function() {
 
+	function getLocal(keys) {
+		return new Promise(function(resolve, reject) {
+			chrome.storage.local.get(keys, resolve);
+		});
+	}
+
+	function setLocal(keys) {
+		return new Promise(function(resolve, reject) {
+			chrome.storage.local.set(keys, resolve);
+		});
+	}
+
+	function getActiveTab() {
+		return (new Promise(function(resolve, reject) {
+			chrome.tabs.query({currentWindow: true, active: true}, resolve);
+		})).then(tabs => tabs[0]);
+	}
+
+	function executeScript(details) {
+		return new Promise(function(resolve, reject) {
+			chrome.tabs.executeScript(details, resolve);
+		});
+	}
+
+	function createNewTab(url) {
+		return new Promise(function(resolve, reject) {
+			chrome.tabs.create({ url: url }, resolve);
+		});
+	}
+
 	let $list = $('.bookmark-list');
 
 	/* Construct initial list */
@@ -8,12 +38,13 @@ $(function() {
 	/* Function for creating list */
 	function createList() {
 		let promises = [
-			browser.storage.local.get('list').then(result => result.list),
-			browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0])
+			getLocal('list').then(result => result.list),
+			getActiveTab()
 		];
 
 		Promise.all(promises).then(function(results) {
 			let [list, tab] = results;
+			console.log(list);
 			if (list) {
 				Object.keys(list).forEach(function(id) {
 					let item = JSON.parse(list[id]);
@@ -34,9 +65,9 @@ $(function() {
 	/* Handle adding items to list */
 	$('.add-btn').click(function() {
 		let promises = [
-			browser.tabs.executeScript({ code: 'window.pageYOffset' }).then(result => result[0]),
-			browser.storage.local.get('list').then(result => result && result.list || {}),
-			browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0])
+			executeScript({ code: 'window.pageYOffset' }).then(result => result[0]),
+			getLocal('list').then(result => result && result.list || {}),
+			getActiveTab()
 		];
 
 		Promise.all(promises).then(function(results) {
@@ -49,7 +80,7 @@ $(function() {
 			};
 			list[id] = JSON.stringify(newItem);
 
-			return browser.storage.local.set({ list: list }).then(function() {
+			return setLocal({ list: list }).then(function() {
 				addListItem(id, newItem);
 			});
 		}).catch(console.error.bind(console));
@@ -72,12 +103,12 @@ $(function() {
 		/* Handle applying scroll positions again */
 		$new.click(function(event) {
 			event.preventDefault();
-			browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0]).then(function(tab) {
-				if (item.url === tab.url) return browser.tabs.executeScript({
+			getActiveTab().then(function(tab) {
+				if (item.url === tab.url) return executeScript({
 					code: `window.scroll({top: ${item.position}, behavior: 'smooth'})`
 				});
 				/* If item url is not the url of the active tab, should open items in new tab */
-				return browser.tabs.create({ url: item.url });
+				return createNewTab(item.url);
 			}).catch(console.error.bind(console));
 		});
 
@@ -86,9 +117,9 @@ $(function() {
 
 		$new.find('.remove-btn').click(function(event) {
 			event.stopPropagation();
-			browser.storage.local.get('list').then(result => result.list).then(function(list) {
+			getLocal('list').then(result => result.list).then(function(list) {
 				delete list[id];
-				return browser.storage.local.set({ list: list });
+				return setLocal({ list: list });
 			}).then(function() {
 				$new.remove();
 			}).catch(console.error.bind(console));
@@ -98,4 +129,4 @@ $(function() {
 });
 
 /* Handle tab change (close popup) */
-browser.tabs.onActivated.addListener(() => window.close());
+chrome.tabs.onActivated.addListener(() => window.close());
