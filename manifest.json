@@ -17,6 +17,13 @@
 
 	"browser_action": {
 		"default_icon": "icons/bookmark-32.png",
+		"theme_icons": [
+			{
+				"light": "icons/bookmark-light-32.png",
+				"dark": "icons/bookmark-32.png",
+				"size": 32
+			}
+		],
 		"default_title": "Bookmark",
 		"default_popup": "popup/bookmark.html"
 	}
