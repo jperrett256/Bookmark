@@ -1,6 +1,7 @@
 $(function() {
 
 	let $list = $('.bookmark-list');
+	let background = browser.runtime.getBackgroundPage();
 
 	/* Construct initial list */
 	createList();
@@ -51,6 +52,7 @@ $(function() {
 
 			return browser.storage.local.set({ list: list }).then(function() {
 				addListItem(id, newItem);
+				background.then(page => page.updateBadge());
 			});
 		}).catch(console.error.bind(console));
 	});
@@ -91,6 +93,7 @@ $(function() {
 				return browser.storage.local.set({ list: list });
 			}).then(function() {
 				$new.remove();
+				background.then(page => page.updateBadge());
 			}).catch(console.error.bind(console));
 		});
 	}
