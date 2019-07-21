@@ -25,11 +25,16 @@ $(function() {
 		}).catch(console.error.bind(console));
 	}
 
+	function recreateList() {
+		// TODO should instead update list with necessary changes
+		$('.bookmark-item').remove();
+		createList();
+	}
+
 	/* Handle toggling filtering (show all or show those for active tab) */
 	$('.filter-btn').click(function() {
 		$(this).toggleClass('active');
-		$('.bookmark-item').remove();
-		createList();
+		recreateList();
 	});
 
 	/* Handle adding items to list */
@@ -75,11 +80,14 @@ $(function() {
 		$new.click(function(event) {
 			event.preventDefault();
 			browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0]).then(function(tab) {
-				if (item.url === tab.url) return browser.tabs.executeScript({
+				let executeScroll = () => browser.tabs.executeScript({
 					code: `window.scroll({top: ${item.position}, behavior: 'smooth'})`
 				});
+
+				if (item.url === tab.url) return executeScroll();
+
 				/* If item url is not the url of the active tab, should open items in new tab */
-				return browser.tabs.create({ url: item.url });
+				return browser.tabs.create({ url: item.url }).then(executeScroll);
 			}).catch(console.error.bind(console));
 		});
 
@@ -98,7 +106,11 @@ $(function() {
 		});
 	}
 
+	/* Handle tab change and url change */
+	browser.tabs.onActivated.addListener(recreateList);
+	browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+		if (changeInfo.status == 'complete') {
+			recreateList();
+		}
+	});
 });
-
-/* Handle tab change (close popup) */
-browser.tabs.onActivated.addListener(() => window.close());
