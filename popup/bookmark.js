@@ -5,6 +5,7 @@ $(function() {
 
 	let showAll = false; // show bookmarks for all urls
 	let searchActive = false;
+	let searchString = '';
 
 	/* Construct initial list */
 	createList();
@@ -21,8 +22,9 @@ $(function() {
 			if (list) {
 				Object.keys(list).forEach(function(id) {
 					let item = JSON.parse(list[id]);
-					/* If the filter is on, need to check if the item url matches the tab url */
-					if (item.url === tab.url || showAll) addListItem(id, item);
+					/* Unless showing all, need to check if the item url matches the tab url.
+					 * Also need to check if the item matches the search string. */
+					if ((item.url === tab.url || showAll) && matchSearch(item)) addListItem(id, item);
 				});
 			}
 		}).catch(console.error.bind(console));
@@ -60,8 +62,20 @@ $(function() {
 			$('.main-btn.right').removeClass('back').addClass('cancel');
 		} else {
 			$('.main-btn.left').removeClass('active');
+
+			// clear input
+			$('.main-btn.left input').val('');
+			searchString = '';
+
 			$('.main-btn.right').removeClass('cancel').addClass('back');
+
+			// update list
+			recreateList();
 		}
+	}
+
+	function matchSearch(item) {
+		return item.title.includes(searchString) || item.url.includes(searchString);
 	}
 
 	/* Handle toggling filtering (show all or show those for active tab) */
@@ -74,7 +88,8 @@ $(function() {
 	});
 
 	$('.main-btn.left input').on('input', function() {
-		// TODO handle search string
+		searchString = $(this).val();
+		recreateList();
 	});
 
 	/* Handle adding items to list */
