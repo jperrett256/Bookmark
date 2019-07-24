@@ -3,6 +3,9 @@ $(function() {
 	let $list = $('.bookmark-list');
 	let background = browser.runtime.getBackgroundPage();
 
+	let showAll = false; // show bookmarks for all urls
+	let searchActive = false;
+
 	/* Construct initial list */
 	createList();
 
@@ -19,7 +22,7 @@ $(function() {
 				Object.keys(list).forEach(function(id) {
 					let item = JSON.parse(list[id]);
 					/* If the filter is on, need to check if the item url matches the tab url */
-					if (item.url === tab.url || !$('.filter-btn').hasClass('active')) addListItem(id, item);
+					if (item.url === tab.url || showAll) addListItem(id, item);
 				});
 			}
 		}).catch(console.error.bind(console));
@@ -31,17 +34,64 @@ $(function() {
 		createList();
 	}
 
-	/* Handle toggling filtering (show all or show those for active tab) */
-	$('.filter-btn').click(function() {
-		$(this).toggleClass('active');
+	function toggleShowAll() {
+		showAll = !showAll;
+
+		if (showAll) {
+			$('.main-btn.left').removeClass('show-all').addClass('search');
+			$('.main-btn.right').removeClass('add').addClass('back');
+		} else {
+			$('.main-btn.left').removeClass('search').addClass('show-all');
+			$('.main-btn.right').removeClass('back').addClass('add');
+		}
+
 		recreateList();
+	}
+
+	function toggleSearchActive() {
+		searchActive = !searchActive;
+
+		if (searchActive) {
+			$('.main-btn.left').addClass('active');
+
+			// place cursor in input
+			setTimeout(() => $('.main-btn.left input').focus(), 200); // animation delay (mirrored in css)
+
+			$('.main-btn.right').removeClass('back').addClass('cancel');
+		} else {
+			$('.main-btn.left').removeClass('active');
+			$('.main-btn.right').removeClass('cancel').addClass('back');
+		}
+	}
+
+	/* Handle toggling filtering (show all or show those for active tab) */
+	$('.main-btn.left').click(function() {
+		if ($(this).hasClass('show-all')) {
+			toggleShowAll();
+		} else if (!$(this).hasClass('active')) { // search button visible but not actively searching
+			toggleSearchActive();
+		}
+	});
+
+	$('.main-btn.left input').on('input', function() {
+		// TODO handle search string
 	});
 
 	/* Handle adding items to list */
-	$('.add-btn').click(function() {
+	$('.main-btn.right').click(function() {
+		if ($(this).hasClass('add')) {
+			addBookmark();
+		} else if ($(this).hasClass('back')) {
+			toggleShowAll();
+		} else { // cancel
+			toggleSearchActive();
+		}
+	});
+
+	function addBookmark() {
 		let promises = [
 			browser.tabs.executeScript({ code: 'window.pageYOffset' }).then(result => result[0]),
-			browser.storage.local.get('list').then(result => result && result.list || {}),
+			browser.storage.local.get('list').then(result => result.list || {}),
 			browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0])
 		];
 
@@ -60,7 +110,7 @@ $(function() {
 				background.then(page => page.updateBadge());
 			});
 		}).catch(console.error.bind(console));
-	});
+	}
 
 	/* Function for adding items to display */
 	function addListItem(id, item) {

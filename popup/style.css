@@ -1,7 +1,7 @@
 @font-face {
 	font-family: 'Montserrat';
 	src: url('fonts/Montserrat-Light.ttf');
-	font-weight: lighter;
+	font-weight: normal;
 }
 
 * {
@@ -110,10 +110,8 @@ body {
 	opacity: 1;
 }
 
-.filter-btn, .add-btn {
+.main-btn {
 	display: flex;
-	justify-content: center;
-	align-items: center;
 	height: 30px;
 	width: 30px;
 	background-color: #323031;
@@ -123,36 +121,79 @@ body {
 	transition: background-color 0.2s ease;
 }
 
-.filter-btn {
+.main-btn.left {
 	left: calc(240px - 30px - 20px - 30px - 10px); /* right: 20px + (add-btn width + margin) + scrollbar width */
 }
 
-.add-btn {
+.main-btn.right {
 	left: calc(240px - 30px - 20px); /* right: 20px + scrollbar width */
 }
 
-.filter-btn:hover, .add-btn:hover {
-	cursor: pointer;
-}
-
-.filter-btn object, .add-btn object {
+.main-btn object {
 	pointer-events: none;
 	width: 16px;
-	transition: filter 0.2s ease;
+	opacity: 0;
+	filter: invert(100%);
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	transition: opacity 0.1s ease, filter 0.1s ease;
 }
 
-.filter-btn.active, .add-btn {
-	background-color: #323031;
+.main-btn.show-all object.show-all {
+	opacity: 1;
+	transition: opacity 0.1s ease 0.1s;
 }
 
-.filter-btn, .add-btn:hover {
+.main-btn.search:not(.active) object.search {
+	opacity: 1;
+	transition: opacity 0.1s ease 0.1s;
+}
+
+.main-btn.add object.add {
+	opacity: 1;
+	transition: opacity 0.1s ease 0.1s;
+}
+
+.main-btn.back object.back {
+	opacity: 1;
+	transition: opacity 0.1s ease 0.1s;
+}
+
+.main-btn.cancel object.cancel {
+	opacity: 1;
+	transition: opacity 0.1s ease 0.1s;
+}
+
+.main-btn input {
+	display: none;
+	border: 0;
+	width: 100%;
+	padding-right: 5px;
+	padding-left: 5px;
+}
+
+.main-btn.search {
+	transition: left 0.1s ease, width 0.1s ease;
+}
+
+.main-btn.search.active {
+	left: 20px;
+	width: calc(240px - 30px - 20px - 30px - 10px - 20px + 30px); /* old left position - new left position + width */
+	background-color: white;
+	transition: left 0.1s ease 0.1s, width 0.1s ease 0.1s;
+}
+
+.main-btn.search.active input {
+	display: initial;
+}
+
+.main-btn:hover {
+	cursor: pointer;
 	background-color: white;
 }
 
-.filter-btn.active object, .add-btn object {
-	filter: invert(100%);
-}
-
-.filter-btn object, .add-btn:hover object {
+.main-btn:hover object {
 	filter: none;
 }
