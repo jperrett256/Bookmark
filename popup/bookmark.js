@@ -8,32 +8,69 @@ $(function() {
 	let searchString = '';
 
 	/* Construct initial list */
-	createList();
+	updateList();
 
-	/* Function for creating list */
-	function createList() {
+	/* Function for updating the displayed list */
+	function updateList() {
 		let promises = [
-			browser.storage.local.get('list').then(result => result.list),
+			browser.storage.local.get('list').then(result => result.list || {}),
 			browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0])
 		];
 
+		// Update displayed list to match new list
 		Promise.all(promises).then(function(results) {
 			let [list, tab] = results;
-			if (list) {
-				Object.keys(list).forEach(function(id) {
-					let item = JSON.parse(list[id]);
-					/* Unless showing all, need to check if the item url matches the tab url.
-					 * Also need to check if the item matches the search string. */
-					if ((item.url === tab.url || showAll) && matchSearch(item)) addListItem(id, item);
-				});
-			}
-		}).catch(console.error.bind(console));
-	}
 
-	function recreateList() {
-		// TODO should instead update list with necessary changes
-		$('.bookmark-item').remove();
-		createList();
+			// Keep previous elements where possible
+			const $previous = $list.children();
+			let old_idx = 0;
+
+			// New list of elements
+			const ids = Object.keys(list);
+			let new_idx = 0;
+
+			while (new_idx < ids.length) {
+				let id = ids[new_idx];
+				let item = JSON.parse(list[id]);
+
+				/* Unless showing all, need to check if the item url matches the tab url.
+				 * Also need to check if the item matches the search string. */
+				if ((item.url === tab.url || showAll) && matchSearch(item)) {
+
+					// Check if there are old elements to compare against
+					if (old_idx < $previous.length) {
+						// Get current old element to compare against
+						let $other = $previous.eq(old_idx);
+						let other_id = $other.attr('id');
+
+						// Check if this should be inserted before the current old element
+						if (id < other_id) {
+							addListItem(id, item, $new => $new.insertBefore($other));
+							new_idx++;
+						} else {
+							if (id != other_id) {
+								// Remove the old element if it is not found in the new list
+								$other.remove();
+							} else {
+								// Element already exists, no need to add
+								new_idx++;
+							}
+							old_idx++;
+						}
+					} else {
+						// If there are no more old elements, place at end of list
+						addListItem(id, item, $new => $new.appendTo($list));
+						new_idx++;
+					}
+				} else {
+					new_idx++;
+				}
+			}
+
+			// Remove any remaining old items
+			$previous.slice(old_idx).remove();
+
+		}).catch(console.error.bind(console));
 	}
 
 	function toggleShowAll() {
@@ -47,7 +84,7 @@ $(function() {
 			$('.main-btn.right').removeClass('back').addClass('add');
 		}
 
-		recreateList();
+		updateList();
 	}
 
 	function toggleSearchActive() {
@@ -70,7 +107,7 @@ $(function() {
 			$('.main-btn.right').removeClass('cancel').addClass('back');
 
 			// update list
-			recreateList();
+			updateList();
 		}
 	}
 
@@ -89,7 +126,7 @@ $(function() {
 
 	$('.main-btn.left input').on('input', function() {
 		searchString = $(this).val();
-		recreateList();
+		updateList();
 	});
 
 	/* Handle adding items to list */
@@ -121,14 +158,14 @@ $(function() {
 			list[id] = JSON.stringify(newItem);
 
 			return browser.storage.local.set({ list: list }).then(function() {
-				addListItem(id, newItem);
+				addListItem(id, newItem, $new => $new.appendTo($list));
 				background.then(page => page.updateBadge());
 			});
 		}).catch(console.error.bind(console));
 	}
 
 	/* Function for adding items to display */
-	function addListItem(id, item) {
+	function addListItem(id, item, insert) {
 		let $new = $(
 			`<li id="${id}" class="bookmark-item">` +
 				`<a href="${item.url}" class="details" ondragstart="return false">` +
@@ -139,7 +176,10 @@ $(function() {
 					'<object data="icons/x.svg"></object>' +
 				'</div>' +
 			'</li>'
-		).appendTo($list);
+		);
+
+		// Allow calling function to decide how the new element is inserted
+		insert($new);
 
 		/* Handle applying scroll positions again */
 		$new.click(function(event) {
@@ -172,10 +212,10 @@ $(function() {
 	}
 
 	/* Handle tab change and url change */
-	browser.tabs.onActivated.addListener(recreateList);
+	browser.tabs.onActivated.addListener(updateList);
 	browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 		if (changeInfo.status == 'complete') {
-			recreateList();
+			updateList();
 		}
 	});
 });

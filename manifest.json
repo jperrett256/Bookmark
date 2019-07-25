@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Bookmark",
-	"version": "1.0",
+	"version": "1.1",
 
 	"description": "Saves scroll positions for websites.",
 
