@@ -168,12 +168,40 @@ $(function() {
 	function addListItem(id, item, insert) {
 		let $new = $(
 			`<li id="${id}" class="bookmark-item">` +
-				`<a href="${item.url}" class="details" ondragstart="return false">` +
-					`<div class="title">${item.title}</div>` +
-					`<div class="url">${item.url}</div>` +
-				'</a>' +
-				'<div class="remove-btn">' +
-					'<object data="icons/x.svg"></object>' +
+				'<div class="main">' +
+					`<a href="${item.url}" class="details" ondragstart="return false">` +
+						`<div class="title">${item.title}</div>` +
+						`<div class="url">${item.url}</div>` +
+					'</a>' +
+					'<div class="edit-btn">' +
+						'<object data="icons/edit-2.svg"></object>' +
+					'</div>' +
+				'</div>' +
+				'<div class="hidden">' +
+					'<div class="left">' +
+						'<div class="icon remove-btn">' +
+							'<object data="icons/trash.svg"></object>' +
+						'</div>' +
+						'<div class="folder-select">' +
+							'<div class="icon">' +
+								'<object data="icons/folder.svg"></object>' +
+							'</div>' +
+							'<div class="selection">' +
+								'<div class="text">None</div>' +
+								'<div class="icon">' +
+									'<object data="icons/chevron-down.svg"></object>' +
+								'</div>' +
+							'</div>' +
+						'</div>' +
+					'</div>' +
+					'<div class="right">' +
+						'<div class="icon cancel-btn">' +
+							'<object data="icons/x.svg"></object>' +
+						'</div>' +
+						'<div class="icon accept-btn">' +
+							'<object data="icons/check.svg"></object>' +
+						'</div>' +
+					'</div>' +
 				'</div>' +
 			'</li>'
 		);
@@ -184,29 +212,66 @@ $(function() {
 		/* Handle applying scroll positions again */
 		$new.click(function(event) {
 			event.preventDefault();
-			browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0]).then(function(tab) {
-				let executeScroll = () => browser.tabs.executeScript({
-					code: `window.scroll({top: ${item.position}, behavior: 'smooth'})`
-				});
+			if (!$new.hasClass('editing')) {
+				browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0]).then(function(tab) {
+					let executeScroll = () => browser.tabs.executeScript({
+						code: `window.scroll({top: ${item.position}, behavior: 'smooth'})`
+					});
 
-				if (item.url === tab.url) return executeScroll();
+					if (item.url === tab.url) return executeScroll();
 
-				/* If item url is not the url of the active tab, should open items in new tab */
-				return browser.tabs.create({ url: item.url }).then(executeScroll);
-			}).catch(console.error.bind(console));
+					/* If item url is not the url of the active tab, should open items in new tab */
+					return browser.tabs.create({ url: item.url }).then(executeScroll);
+				}).catch(console.error.bind(console));
+			}
 		});
 
 		/* Prevent link from being dragged */
 		$new.on('dragstart', () => false);
 
-		$new.find('.remove-btn').click(function(event) {
+		$new.find('.edit-btn').click(function(event) {
 			event.stopPropagation();
+			$new.addClass('editing');
+			$new.find('.details').removeAttr('href'); // gets in the way of cursor placement
+			$new.find('.title').html(`<input value="${item.title}">`);
+			let $input = $new.find('.title input').focus();
+			$input.get(0).setSelectionRange(item.title.length, item.title.length);
+		});
+
+		$new.find('.remove-btn').click(function(event) {
 			browser.storage.local.get('list').then(result => result.list).then(function(list) {
 				delete list[id];
 				return browser.storage.local.set({ list: list });
 			}).then(function() {
 				$new.remove();
 				background.then(page => page.updateBadge());
+			}).catch(console.error.bind(console));
+		});
+
+		$new.find('.folder-btn').click(function(event) {
+			// TODO
+		});
+
+		function stopEditing(event) {
+			event.stopPropagation();
+			$new.find('.details').attr('href', item.url);
+			$new.find('.title').text(item.title);
+			$new.removeClass('editing');
+		}
+
+		$new.find('.cancel-btn').click(function(event) {
+			stopEditing(event);
+		});
+
+		$new.find('.accept-btn').click(function(event) {
+			let value = $new.find('.title input').val();
+
+			browser.storage.local.get('list').then(result => result.list).then(function(list) {
+				item.title = value; // assumes the item copy matches the one in storage
+				list[id] = JSON.stringify(item);
+				return browser.storage.local.set({ list: list });
+			}).then(function() {
+				stopEditing(event);
 			}).catch(console.error.bind(console));
 		});
 	}
