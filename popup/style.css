@@ -77,6 +77,11 @@ input {
 
 .bookmark-item .hidden {
 	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-item .options {
+	display: flex;
 	justify-content: space-between;
 	border-top: 0px solid transparent;
 	height: 0;
@@ -84,55 +89,122 @@ input {
 	transition: border 0s ease 0.2s, height 0.2s ease, opacity 0.1s ease;
 }
 
-.bookmark-item .hidden > * {
-	display: flex;
+.bookmark-item .options > * {
+	cursor: pointer;
 }
 
-.bookmark-item .hidden .left {
-	flex-grow: 1;
+.bookmark-item .options > :not(:first-child) {
+	border-left: 1px solid #323031;
 }
 
-.bookmark-item .folder-select {
-	flex-grow: 1;
+.bookmark-item .folder-btn {
+	width: calc(100% - 3 * 45px / 1.618);
 	display: flex;
 	align-items: center;
 }
 
-.bookmark-item .folder-select .selection {
+.bookmark-item .folder-btn .selection {
 	flex-grow: 1;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	height: 100%;
+	width: calc(100% - 45px / 1.618);
 	font-size: 12px;
 }
 
-.bookmark-item .hidden .left > :first-child {
-	border-right: 1px solid #323031;
+.bookmark-item .folder-btn .selection object {
+	transition: transform 0.1s ease;
 }
 
-.bookmark-item .hidden .right > * {
-	border-left: 1px solid #323031;
+.bookmark-item.folder-select .folder-btn .selection object {
+	transform: rotate(180deg);
 }
 
-.bookmark-item .hidden .icon {
+.bookmark-item .folder-btn .text {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.bookmark-item .icon {
 	display: flex;
+	flex-shrink: 0;
 	justify-content: center;
 	align-items: center;
 	height: 100%;
 	width: calc(45px / 1.618);
 }
 
-.bookmark-item .hidden object {
+.bookmark-item .icon object {
 	width: 16px;
 	pointer-events: none;
 }
 
-.bookmark-item.editing .hidden {
+.bookmark-item.editing .options {
 	border-top: 1px solid #323031;
 	height: calc(45px / 1.618);
 	opacity: 1;
 	transition: height 0.2s ease, opacity 0.2s ease;
+}
+
+.bookmark-item .folder-list {
+	display: flex;
+	flex-direction: column;
+	font-size: 12px;
+}
+
+.bookmark-item:not(.folder-select) .folder-list {
+	pointer-events: none;
+}
+
+.bookmark-item .folder-list > * {
+	display: flex;
+	align-items: center;
+	height: 0;
+	opacity: 0;
+	border-top: 0px solid transparent;
+	transition: height 0.1s ease, opacity 0.1s ease, border 0s ease 0.1s;
+	color: black;
+	background-color: white;
+}
+
+.bookmark-item .folder-list > :not(:last-child) {
+	padding-right: 10px;
+	padding-left: 10px;
+}
+
+.bookmark-item .folder-list .text {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.bookmark-item.folder-select .folder-list > * {
+	height: calc(45px / 1.618);
+	opacity: 1;
+	border-top: 1px solid #323031;
+	transition: height 0.1s ease, opacity 0.1s ease, color 0.1s ease, background-color 0.1s ease;
+}
+
+.bookmark-item .folder-list > :not(:last-child).selected, .bookmark-item .folder-list > :not(:last-child):hover {
+	color: white;
+	background-color: #323031;
+}
+
+.bookmark-item .folder-add {
+	display: flex;
+}
+
+.bookmark-item .folder-add input {
+	padding: 0;
+	margin: 0;
+	padding-right: 10px;
+	padding-left: 10px;
+	border: 0;
+	display: inline;
+	height: 100%;
+	width: calc(100% - 45px / 1.618);
 }
 
 .bookmark-item:not(:first-child) {
@@ -227,27 +299,27 @@ input {
 
 .main-btn.show-all object.show-all {
 	opacity: 1;
-	transition: opacity 0.1s ease 0.1s;
+	transition: opacity 0.1s ease 0.1s, filter 0.1s ease;
 }
 
 .main-btn.search:not(.active) object.search {
 	opacity: 1;
-	transition: opacity 0.1s ease 0.1s;
+	transition: opacity 0.1s ease 0.1s, filter 0.1s ease;
 }
 
 .main-btn.add object.add {
 	opacity: 1;
-	transition: opacity 0.1s ease 0.1s;
+	transition: opacity 0.1s ease 0.1s, filter 0.1s ease;
 }
 
 .main-btn.back object.back {
 	opacity: 1;
-	transition: opacity 0.1s ease 0.1s;
+	transition: opacity 0.1s ease 0.1s, filter 0.1s ease;
 }
 
 .main-btn.cancel object.cancel {
 	opacity: 1;
-	transition: opacity 0.1s ease 0.1s;
+	transition: opacity 0.1s ease 0.1s, filter 0.1s ease;
 }
 
 .main-btn input {
@@ -260,7 +332,7 @@ input {
 }
 
 .main-btn.search {
-	transition: left 0.1s ease, width 0.1s ease;
+	transition: background-color 0.2s ease, left 0.1s ease, width 0.1s ease;
 }
 
 .main-btn.search.active {

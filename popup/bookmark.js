@@ -178,23 +178,21 @@ $(function() {
 					'</div>' +
 				'</div>' +
 				'<div class="hidden">' +
-					'<div class="left">' +
+					'<div class="options">' +
 						'<div class="icon remove-btn">' +
 							'<object data="icons/trash.svg"></object>' +
 						'</div>' +
-						'<div class="folder-select">' +
+						'<div class="folder-btn">' +
 							'<div class="icon">' +
 								'<object data="icons/folder.svg"></object>' +
 							'</div>' +
 							'<div class="selection">' +
-								'<div class="text">None</div>' +
+								`<div class="text">${item.folder || 'None'}</div>` +
 								'<div class="icon">' +
 									'<object data="icons/chevron-down.svg"></object>' +
 								'</div>' +
 							'</div>' +
 						'</div>' +
-					'</div>' +
-					'<div class="right">' +
 						'<div class="icon cancel-btn">' +
 							'<object data="icons/x.svg"></object>' +
 						'</div>' +
@@ -202,6 +200,7 @@ $(function() {
 							'<object data="icons/check.svg"></object>' +
 						'</div>' +
 					'</div>' +
+					'<div class="folder-list"></div>' +
 				'</div>' +
 			'</li>'
 		);
@@ -231,6 +230,64 @@ $(function() {
 
 		$new.find('.edit-btn').click(function(event) {
 			event.stopPropagation();
+			browser.storage.local.get('folders').then(result => result.folders || []).then(function(folders) {
+
+				$new.find('.folder-list').html(
+					`<div${ !item.folder ? ' class="selected"' : ''}>` +
+						'<div class="text">None</div>' +
+					'</div>' +
+					folders.map(folder => (
+						`<div${ item.folder === folder ? ' class="selected"' : ''}>` +
+							`<div class="text">${folder}</div>` +
+						'</div>'
+					)).join('') +
+					'<div class="folder-add">' +
+						'<input>' +
+						'<div class="icon add-btn">' +
+							'<object data="icons/plus.svg"></object>' +
+						'</div>' +
+					'</div>'
+				);
+
+				function folderSelection() {
+					let $folders = $new.find('.folder-list > :not(:last-child)');
+					let index = $folders.index(this) - 1;
+					item.folder = index > -1 ? folders[index] : null;
+					$new.find('.folder-btn .text').text(item.folder || 'None');
+					$folders.removeClass('selected');
+					$(this).addClass('selected');
+				}
+
+				$new.find('.folder-list > :not(:last-child)').click(folderSelection);
+
+				$new.find('.add-btn').click(function() {
+					let $input = $new.find('.folder-add input')
+					let value = $input.val();
+					if (value && !folders.includes(value)) {
+						folders.push(value);
+						// TODO should the folders item in storage be a dictionary of arrays associating folders with items?
+						browser.storage.local.set({ folders: folders }).then(function() {
+							// Insert folder option
+							let $folder = $(
+								'<div>' +
+									`<div class="text">${value}</div>` +
+								'</div>'
+							).insertBefore($new.find('.folder-add'));
+
+							// Add click event handler
+							$folder.click(folderSelection);
+
+							// Clear new folder option input
+							$input.val('');
+						}).catch(console.error.bind(console));
+					}
+				});
+
+				// TODO move adding folders to a different part of the UI?
+				// TODO add deleting folders here? automatically remove folders with no items?
+
+			}).catch(console.error.bind(console));
+
 			$new.addClass('editing');
 			$new.find('.details').removeAttr('href'); // gets in the way of cursor placement
 			$new.find('.title').html(`<input value="${item.title}">`);
@@ -249,14 +306,23 @@ $(function() {
 		});
 
 		$new.find('.folder-btn').click(function(event) {
-			// TODO
+			$new.toggleClass('folder-select');
 		});
 
 		function stopEditing(event) {
 			event.stopPropagation();
+			$new.find('.folder-list').empty();
 			$new.find('.details').attr('href', item.url);
 			$new.find('.title').text(item.title);
-			$new.removeClass('editing');
+			$new.removeClass('editing folder-select');
+
+			// Reset folder label to whatever is saved in storage
+			browser.storage.local.get('list').then(result => result.list).then(function(list) {
+				let folder = JSON.parse(list[id]).folder;
+
+				$new.find('.folder-btn .text').text(folder || 'None');
+				item.folder = folder;
+			}).catch(console.error.bind(console));
 		}
 
 		$new.find('.cancel-btn').click(function(event) {
@@ -266,11 +332,13 @@ $(function() {
 		$new.find('.accept-btn').click(function(event) {
 			let value = $new.find('.title input').val();
 
+			// Save new title and folder in storage (new folder stored in item.folder)
 			browser.storage.local.get('list').then(result => result.list).then(function(list) {
-				item.title = value; // assumes the item copy matches the one in storage
+				item.title = value;
 				list[id] = JSON.stringify(item);
 				return browser.storage.local.set({ list: list });
 			}).then(function() {
+				// Stop editing
 				stopEditing(event);
 			}).catch(console.error.bind(console));
 		});
