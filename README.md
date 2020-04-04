@@ -6,7 +6,7 @@ An extension for saving scroll positions.
 
 1. Clone the repository
 2. Within `popup`:
-	- Create `resources` directory, add latest version of [jQuery](https://jquery.com/download/)
+	- Create `vendor` directory, add latest version of [jQuery](https://jquery.com/download/)
 	- Create `fonts` directory, add [Monsterrat](https://fonts.google.com/specimen/Montserrat) fonts
 3. Package everything in a zip file (with no compression)
 

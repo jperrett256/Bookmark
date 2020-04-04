@@ -73,6 +73,7 @@ $(function() {
 		}).catch(console.error.bind(console));
 	}
 
+	/* Toggle between showing all bookmarks and the bookmarks for the active tab */
 	function toggleShowAll() {
 		showAll = !showAll;
 
@@ -87,6 +88,7 @@ $(function() {
 		updateList();
 	}
 
+	/* Toggle the search bar */
 	function toggleSearchActive() {
 		searchActive = !searchActive;
 
@@ -115,7 +117,7 @@ $(function() {
 		return item.title.includes(searchString) || item.url.includes(searchString);
 	}
 
-	/* Handle toggling filtering (show all or show those for active tab) */
+	/* Handle button for toggling between show all or show those for active tab */
 	$('.main-btn.left').click(function() {
 		if ($(this).hasClass('show-all')) {
 			toggleShowAll();
@@ -124,6 +126,7 @@ $(function() {
 		}
 	});
 
+	/* Handle change to inputted search string */
 	$('.main-btn.left input').on('input', function() {
 		searchString = $(this).val();
 		updateList();
@@ -140,6 +143,7 @@ $(function() {
 		}
 	});
 
+	// Collects and stores information about the active tab in a new bookmark
 	function addBookmark() {
 		let promises = [
 			browser.tabs.executeScript({ code: 'window.pageYOffset' }).then(result => result[0]),
@@ -307,6 +311,17 @@ $(function() {
 
 		$new.find('.folder-btn').click(function(event) {
 			$new.toggleClass('folder-select');
+
+			// focus the cursor where appropriate
+			let $input;
+			if ($new.hasClass('folder-select')) {
+				$input = $new.find('.folder-add input');
+			} else {
+				$input = $new.find('.title input');
+			}
+
+			$input.focus();
+			$input.get(0).setSelectionRange($input.val().length, $input.val().length);
 		});
 
 		function stopEditing(event) {

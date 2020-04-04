@@ -207,6 +207,10 @@ input {
 	width: calc(100% - 45px / 1.618);
 }
 
+.bookmark-item .folder-add .add-btn {
+	cursor: pointer;
+}
+
 .bookmark-item:not(:first-child) {
 	margin-top: 10px;
 }
@@ -299,27 +303,27 @@ input {
 
 .main-btn.show-all object.show-all {
 	opacity: 1;
-	transition: opacity 0.1s ease 0.1s, filter 0.1s ease;
+	transition: opacity 0.1s ease 0.1s;
 }
 
 .main-btn.search:not(.active) object.search {
 	opacity: 1;
-	transition: opacity 0.1s ease 0.1s, filter 0.1s ease;
+	transition: opacity 0.1s ease 0.1s;
 }
 
 .main-btn.add object.add {
 	opacity: 1;
-	transition: opacity 0.1s ease 0.1s, filter 0.1s ease;
+	transition: opacity 0.1s ease 0.1s;
 }
 
 .main-btn.back object.back {
 	opacity: 1;
-	transition: opacity 0.1s ease 0.1s, filter 0.1s ease;
+	transition: opacity 0.1s ease 0.1s;
 }
 
 .main-btn.cancel object.cancel {
 	opacity: 1;
-	transition: opacity 0.1s ease 0.1s, filter 0.1s ease;
+	transition: opacity 0.1s ease 0.1s;
 }
 
 .main-btn input {
