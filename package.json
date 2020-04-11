@@ -1,0 +1,35 @@
+{
+  "name": "Bookmark",
+  "version": "1.0.0",
+  "description": "An extension for saving scroll positions.",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "parcel popup/index.html",
+    "build": "parcel build popup/index.html --public-url ./ --out-dir src/popup",
+    "clean": "rm -rf .cache && rm -rf dist && rm -rf src/popup"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jperrett256/Bookmark.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jperrett256/Bookmark/issues"
+  },
+  "homepage": "https://github.com/jperrett256/Bookmark#readme",
+  "dependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-feather": "^2.0.3",
+    "styled-jsx": "^3.2.5"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "cssnano": "^4.1.10"
+  }
+}

@@ -1,0 +1,15 @@
+@font-face {
+	font-family: 'Montserrat';
+	src: url('fonts/Montserrat-Light.ttf');
+	font-weight: normal;
+}
+
+* {
+	box-sizing: inherit;
+}
+
+body {
+	box-sizing: border-box;
+	margin: 0;
+	font-family: 'Montserrat';
+}

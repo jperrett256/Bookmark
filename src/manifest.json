@@ -30,6 +30,6 @@
 			}
 		],
 		"default_title": "Bookmark",
-		"default_popup": "popup/bookmark.html"
+		"default_popup": "popup/index.html"
 	}
 }

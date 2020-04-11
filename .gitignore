@@ -1,2 +1,3 @@
-popup/fonts/
-popup/vendor/
+.cache
+node_modules/
+src/popup/
