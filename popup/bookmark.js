@@ -1,7 +1,6 @@
 $(function() {
 
 	let $list = $('.bookmark-list');
-	let background = browser.runtime.getBackgroundPage();
 
 	let showAll = false; // show bookmarks for all urls
 	let searchActive = false;
@@ -13,8 +12,8 @@ $(function() {
 	/* Function for updating the displayed list */
 	function updateList() {
 		let promises = [
-			browser.storage.local.get('list').then(result => result.list || {}),
-			browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0])
+			chrome.storage.local.get('list').then(result => result.list || {}),
+			chrome.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0])
 		];
 
 		// Update displayed list to match new list
@@ -145,26 +144,28 @@ $(function() {
 
 	// Collects and stores information about the active tab in a new bookmark
 	function addBookmark() {
+		let getCurrentPosition = (list, tab) => chrome.scripting.executeScript({ func: () => window.scrollY, target: {tabId: tab.id} }).then(injectionResp => [list, tab, injectionResp[0].result])
 		let promises = [
-			browser.tabs.executeScript({ code: 'window.pageYOffset' }).then(result => result[0]),
-			browser.storage.local.get('list').then(result => result.list || {}),
-			browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0])
+			chrome.storage.local.get('list').then(result => result.list || {}),
+			chrome.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0])
 		];
 
-		Promise.all(promises).then(function(results) {
-			let [position, list, tab] = results;
-			let id = Date.now();
-			let newItem = {
-				title: tab.title,
-				url: tab.url,
-				position: position
-			};
-			list[id] = JSON.stringify(newItem);
+		Promise.all(promises)
+			.then((results) => getCurrentPosition(results[0], results[1]))
+			.then(function(results) {
+				let [list, tab, position] = results;
+				let id = Date.now();
+				let newItem = {
+					title: tab.title,
+					url: tab.url,
+					position: position
+				};
+				list[id] = JSON.stringify(newItem);
 
-			return browser.storage.local.set({ list: list }).then(function() {
-				addListItem(id, newItem, $new => $new.appendTo($list));
-				background.then(page => page.updateBadge());
-			});
+				return chrome.storage.local.set({ list: list }).then(function() {
+					addListItem(id, newItem, $new => $new.appendTo($list));
+					chrome.runtime.sendMessage({tab: tab})
+				});
 		}).catch(console.error.bind(console));
 	}
 
@@ -216,15 +217,17 @@ $(function() {
 		$new.click(function(event) {
 			event.preventDefault();
 			if (!$new.hasClass('editing')) {
-				browser.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0]).then(function(tab) {
-					let executeScroll = () => browser.tabs.executeScript({
-						code: `window.scroll({top: ${item.position}, behavior: 'smooth'})`
+				chrome.tabs.query({currentWindow: true, active: true}).then(tabs => tabs[0]).then(function(tab) {
+					let executeScroll = (id, position) => chrome.scripting.executeScript({
+						args: [position],
+						func: (newPos) => window.scroll({top: newPos, behavior: 'smooth'}),
+						target: {tabId: id}
 					});
 
-					if (item.url === tab.url) return executeScroll();
+					if (item.url === tab.url) return executeScroll(tab.id, item.position);
 
 					/* If item url is not the url of the active tab, should open items in new tab */
-					return browser.tabs.create({ url: item.url }).then(executeScroll);
+					return chrome.tabs.create({ url: item.url }).then((tab) => executeScroll(tab.id, item.position));
 				}).catch(console.error.bind(console));
 			}
 		});
@@ -234,7 +237,7 @@ $(function() {
 
 		$new.find('.edit-btn').click(function(event) {
 			event.stopPropagation();
-			browser.storage.local.get('folders').then(result => result.folders || []).then(function(folders) {
+			chrome.storage.local.get('folders').then(result => result.folders || []).then(function(folders) {
 
 				$new.find('.folder-list').html(
 					`<div${ !item.folder ? ' class="selected"' : ''}>` +
@@ -270,7 +273,7 @@ $(function() {
 					if (value && !folders.includes(value)) {
 						folders.push(value);
 						// TODO should the folders item in storage be a dictionary of arrays associating folders with items?
-						browser.storage.local.set({ folders: folders }).then(function() {
+						chrome.storage.local.set({ folders: folders }).then(function() {
 							// Insert folder option
 							let $folder = $(
 								'<div>' +
@@ -300,12 +303,14 @@ $(function() {
 		});
 
 		$new.find('.remove-btn').click(function(event) {
-			browser.storage.local.get('list').then(result => result.list).then(function(list) {
+			chrome.storage.local.get('list').then(result => result.list).then(function(list) {
 				delete list[id];
-				return browser.storage.local.set({ list: list });
+				return chrome.storage.local.set({ list: list });
 			}).then(function() {
 				$new.remove();
-				background.then(page => page.updateBadge());
+				chrome.tabs.query({currentWindow: true, active: true}).then((tabs) => {
+					chrome.runtime.sendMessage({tab: tabs[0]});
+				})
 			}).catch(console.error.bind(console));
 		});
 
@@ -332,7 +337,7 @@ $(function() {
 			$new.removeClass('editing folder-select');
 
 			// Reset folder label to whatever is saved in storage
-			browser.storage.local.get('list').then(result => result.list).then(function(list) {
+			chrome.storage.local.get('list').then(result => result.list).then(function(list) {
 				let folder = JSON.parse(list[id]).folder;
 
 				$new.find('.folder-btn .text').text(folder || 'None');
@@ -348,10 +353,10 @@ $(function() {
 			let value = $new.find('.title input').val();
 
 			// Save new title and folder in storage (new folder stored in item.folder)
-			browser.storage.local.get('list').then(result => result.list).then(function(list) {
+			chrome.storage.local.get('list').then(result => result.list).then(function(list) {
 				item.title = value;
 				list[id] = JSON.stringify(item);
-				return browser.storage.local.set({ list: list });
+				return chrome.storage.local.set({ list: list });
 			}).then(function() {
 				// Stop editing
 				stopEditing(event);
@@ -360,8 +365,8 @@ $(function() {
 	}
 
 	/* Handle tab change and url change */
-	browser.tabs.onActivated.addListener(updateList);
-	browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+	chrome.tabs.onActivated.addListener(updateList);
+	chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 		if (changeInfo.status == 'complete') {
 			updateList();
 		}
