@@ -3,13 +3,9 @@ $(function() {
 	let $list = $('.bookmark-list');
 
 	let showAll = false; // show bookmarks for all urls
-	let searchActive = false;
-	let searchString = '';
-
 
 	/* Construct initial list */
 	view.updateList();
-
 
 
 	/* Toggle between showing all bookmarks and the bookmarks for the active tab */
@@ -27,31 +23,6 @@ $(function() {
 		view.updateList();
 	}
 
-	/* Toggle the search bar */
-	function toggleSearchActive() {
-		searchActive = !searchActive;
-
-		if (searchActive) {
-			$('.main-btn.left').addClass('active');
-
-			// place cursor in input
-			setTimeout(() => $('.main-btn.left input').focus(), 200); // animation delay (mirrored in css)
-
-			$('.main-btn.right').removeClass('back').addClass('cancel');
-		} else {
-			$('.main-btn.left').removeClass('active');
-
-			// clear input
-			$('.main-btn.left input').val('');
-			searchString = '';
-
-			$('.main-btn.right').removeClass('cancel').addClass('back');
-
-			// update list
-			updateList();
-		}
-	}
-
 	function matchSearch(item) {
 		return item.title.includes(searchString) || item.url.includes(searchString);
 	}
@@ -61,7 +32,7 @@ $(function() {
 		if ($(this).hasClass('show-all')) {
 			toggleShowAll();
 		} else if (!$(this).hasClass('active')) { // search button visible but not actively searching
-			toggleSearchActive();
+			search.enable();
 		}
 	});
 
@@ -78,7 +49,7 @@ $(function() {
 		} else if ($(this).hasClass('back')) {
 			toggleShowAll();
 		} else { // cancel
-			toggleSearchActive();
+			search.disable();
 		}
 	});
 
@@ -89,9 +60,8 @@ $(function() {
 		}).catch(console.error.bind(console));
 	}
 
-	/* Function for adding items to display */
-	function addListItem(id, item, insert) {
-		let $new = $(
+	function newListItem(id, item) {
+		return $(
 			`<li id="${id}" class="bookmark-item">` +
 				'<div class="main">' +
 					`<a href="${item.url}" class="details" ondragstart="return false">` +
@@ -129,10 +99,9 @@ $(function() {
 				'</div>' +
 			'</li>'
 		);
+	}
 
-		// Allow calling function to decide how the new element is inserted
-		insert($new);
-
+	function initListItem($new) {
 		/* Handle applying scroll positions again */
 		$new.click(function(event) {
 			event.preventDefault();
@@ -144,27 +113,56 @@ $(function() {
 		/* Prevent link from being dragged */
 		$new.on('dragstart', () => false);
 
+		$new.find('.remove-btn').click(function(event) {
+			bookmark.removeBookmark(id).then(() => {
+				$new.remove();
+			}).catch(console.error.bind(console));
+		});
+	}
+
+	function newFolderList(item, folders) {
+		return (
+			`<div${ !item.folder ? ' class="selected"' : ''}>` +
+				'<div class="text">None</div>' +
+			'</div>' +
+
+			folders.map(
+				folder => newFolderListItem(item.folder === folder, folder)
+			).join('') +
+
+			'<div class="folder-add">' +
+				'<input>' +
+				'<div class="icon add-btn">' +
+					'<object data="icons/plus.svg"></object>' +
+				'</div>' +
+			'</div>'
+		);
+	}
+
+	function newFolderListItem(selected, name) {
+		return (
+			`<div${ selected ? ' class="selected"' : ''}>` +
+				`<div class="text">${name}</div>` +
+			'</div>'
+		);
+	}
+
+	/* Function for adding items to display */
+	function addListItem(id, item, insert) {
+		let $new = newListItem(id, item);
+
+		// Allow calling function to decide how the new element is inserted
+		insert($new);
+
+		initListItem($new);
+
+
 		$new.find('.edit-btn').click(function(event) {
 			event.stopPropagation();
 			// TODO omg stop
-			browser.storage.local.get('folders').then(result => result.folders || []).then(function(folders) {
+			bookmark.getFolderList().then(function(folders) {
 
-				$new.find('.folder-list').html(
-					`<div${ !item.folder ? ' class="selected"' : ''}>` +
-						'<div class="text">None</div>' +
-					'</div>' +
-					folders.map(folder => (
-						`<div${ item.folder === folder ? ' class="selected"' : ''}>` +
-							`<div class="text">${folder}</div>` +
-						'</div>'
-					)).join('') +
-					'<div class="folder-add">' +
-						'<input>' +
-						'<div class="icon add-btn">' +
-							'<object data="icons/plus.svg"></object>' +
-						'</div>' +
-					'</div>'
-				);
+				$new.find('.folder-list').html(newFolderList(item, folders));
 
 				function folderSelection() {
 					let $folders = $new.find('.folder-list > :not(:last-child)');
@@ -186,9 +184,7 @@ $(function() {
 						browser.storage.local.set({ folders: folders }).then(function() {
 							// Insert folder option
 							let $folder = $(
-								'<div>' +
-									`<div class="text">${value}</div>` +
-								'</div>'
+								newFolderListItem(false, value)
 							).insertBefore($new.find('.folder-add'));
 
 							// Add click event handler
@@ -212,11 +208,7 @@ $(function() {
 			$input.get(0).setSelectionRange(item.title.length, item.title.length);
 		});
 
-		$new.find('.remove-btn').click(function(event) {
-			bookmark.removeBookmark(id).then(() => {
-				$new.remove();
-			}).catch(console.error.bind(console));
-		});
+
 
 		$new.find('.folder-btn').click(function(event) {
 			$new.toggleClass('folder-select');

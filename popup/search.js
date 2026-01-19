@@ -29,6 +29,7 @@ const search = (function() {
 		enable,
 		disable,
 		match,
-		dispatcher
+		on: dispatcher.on,
+		off: dispatcher.off
 	};
 })();

@@ -97,4 +97,15 @@ const bookmark = (function() {
 // 	}
 // });
 
-export default bookmark;
+class Bookmark {
+	constructor(id, name, url) {
+		this.id = id;
+
+		this.name = name;
+		this.url = url;
+	}
+
+	match(searchString) {
+		return this.name.includes(searchString) || this.url.includes(searchString);
+	}
+}

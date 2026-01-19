@@ -27,7 +27,7 @@ const view = (function () {
 
 				/* Unless showing all, need to check if the item url matches the tab url.
 				 * Also need to check if the item matches the search string. */
-				if ((item.url === tab.url || showAll) && matchSearch(item)) {
+				if ((item.url === tab.url || showAll) && search.match(item)) {
 
 					// Check if there are old elements to compare against
 					if (old_idx < $previous.length) {
@@ -66,9 +66,40 @@ const view = (function () {
 	}
 
 
+	search.on('enable', () => {
+		$('.main-btn.left').addClass('active');
+
+		// place cursor in input
+		setTimeout(() => $('.main-btn.left input').focus(), 200); // animation delay (mirrored in css)
+
+		$('.main-btn.right').removeClass('back').addClass('cancel');
+	});
+
+	search.on('disable', () => {
+		$('.main-btn.left').removeClass('active');
+
+		// clear input
+		$('.main-btn.left input').val('');
+		searchString = '';
+
+		$('.main-btn.right').removeClass('cancel').addClass('back');
+
+		// update list
+		updateList();
+	});
+
+
 
 	return {
 		updateList
 	};
 
 })();
+
+class BookmarkList {
+	// TODO
+}
+
+class BookmarkListItem {
+	// TODO
+}
