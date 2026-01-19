@@ -178,30 +178,30 @@ $(function() {
 						`<div class="url">${item.url}</div>` +
 					'</a>' +
 					'<div class="edit-btn">' +
-						'<object data="icons/edit-2.svg"></object>' +
+						'<img src="icons/edit-2.svg">' +
 					'</div>' +
 				'</div>' +
 				'<div class="hidden">' +
 					'<div class="options">' +
 						'<div class="icon remove-btn">' +
-							'<object data="icons/trash.svg"></object>' +
+							'<img src="icons/trash.svg">' +
 						'</div>' +
 						'<div class="folder-btn">' +
 							'<div class="icon">' +
-								'<object data="icons/folder.svg"></object>' +
+								'<img src="icons/folder.svg">' +
 							'</div>' +
 							'<div class="selection">' +
 								`<div class="text">${item.folder || 'None'}</div>` +
 								'<div class="icon">' +
-									'<object data="icons/chevron-down.svg"></object>' +
+									'<img src="icons/chevron-down.svg">' +
 								'</div>' +
 							'</div>' +
 						'</div>' +
 						'<div class="icon cancel-btn">' +
-							'<object data="icons/x.svg"></object>' +
+							'<img src="icons/x.svg">' +
 						'</div>' +
 						'<div class="icon accept-btn">' +
-							'<object data="icons/check.svg"></object>' +
+							'<img src="icons/check.svg">' +
 						'</div>' +
 					'</div>' +
 					'<div class="folder-list"></div>' +
@@ -248,7 +248,7 @@ $(function() {
 					'<div class="folder-add">' +
 						'<input>' +
 						'<div class="icon add-btn">' +
-							'<object data="icons/plus.svg"></object>' +
+							'<img src="icons/plus.svg">' +
 						'</div>' +
 					'</div>'
 				);

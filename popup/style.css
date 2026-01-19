@@ -113,11 +113,11 @@ input {
 	font-size: 12px;
 }
 
-.bookmark-item .folder-btn .selection object {
+.bookmark-item .folder-btn .selection img {
 	transition: transform 0.1s ease;
 }
 
-.bookmark-item.folder-select .folder-btn .selection object {
+.bookmark-item.folder-select .folder-btn .selection img {
 	transform: rotate(180deg);
 }
 
@@ -136,7 +136,7 @@ input {
 	width: calc(45px / 1.618);
 }
 
-.bookmark-item .icon object {
+.bookmark-item .icon img {
 	width: 16px;
 	pointer-events: none;
 }
@@ -259,13 +259,13 @@ input {
 	transition: width 0.2s ease;
 }
 
-.bookmark-item .edit-btn object {
+.bookmark-item .edit-btn img {
 	width: 16px;
 	opacity: 0;
 	transition: opacity 0.1s ease;
 }
 
-.bookmark-item:not(.editing):hover .edit-btn object {
+.bookmark-item:not(.editing):hover .edit-btn img {
 	pointer-events: none;
 	opacity: 1;
 }
@@ -289,7 +289,7 @@ input {
 	left: calc(240px - 30px - 20px); /* right: 20px + scrollbar width */
 }
 
-.main-btn object {
+.main-btn img {
 	pointer-events: none;
 	width: 16px;
 	opacity: 0;
@@ -301,27 +301,27 @@ input {
 	transition: opacity 0.1s ease, filter 0.1s ease;
 }
 
-.main-btn.show-all object.show-all {
+.main-btn.show-all img.show-all {
 	opacity: 1;
 	transition: opacity 0.1s ease 0.1s;
 }
 
-.main-btn.search:not(.active) object.search {
+.main-btn.search:not(.active) img.search {
 	opacity: 1;
 	transition: opacity 0.1s ease 0.1s;
 }
 
-.main-btn.add object.add {
+.main-btn.add img.add {
 	opacity: 1;
 	transition: opacity 0.1s ease 0.1s;
 }
 
-.main-btn.back object.back {
+.main-btn.back img.back {
 	opacity: 1;
 	transition: opacity 0.1s ease 0.1s;
 }
 
-.main-btn.cancel object.cancel {
+.main-btn.cancel img.cancel {
 	opacity: 1;
 	transition: opacity 0.1s ease 0.1s;
 }
@@ -355,6 +355,6 @@ input {
 	background-color: white;
 }
 
-.main-btn:hover object {
+.main-btn:hover img {
 	filter: none;
 }

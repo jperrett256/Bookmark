@@ -15,4 +15,4 @@ The packaged extension can now be signed and used.
 ## Notes
 
 - This was written for Firefox
-- This was tested with jQuery version 3.3.1
+- This was tested with jQuery version 3.4.1
